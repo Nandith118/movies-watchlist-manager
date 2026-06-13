@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-warning fw-bold mb-4 text-center">🎬 Admin Dashboard</h2>
+
+  <div class="text-center mb-4">
+    <a href="{{ url_for('add_media') }}" class="btn btn-success rounded-pill">+ Add New Media</a>
+    <a href="{{ url_for('admin_logout') }}" class="btn btn-danger rounded-pill ms-2">Logout</a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-striped table-hover text-center align-middle">
+      <thead style="background: linear-gradient(90deg, #ff512f, #dd2476); color: white;">
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Type</th>
+          <th>Year</th>
+          <th>IMDB</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in media %}
+        <tr>
+          <td>{{ m[0] }}</td>
+          <td>{{ m[1] }}</td>
+          <td>{{ m[2] }}</td>
+          <td>{{ m[3] }}</td>
+          <td>{{ m[4] or 'N/A' }}</td>
+          <td>
+            <a href="{{ url_for('media_detail', mid=m[0]) }}" class="btn btn-sm btn-primary">View</a>
+            <a href="{{ url_for('delete_media', mid=m[0]) }}" class="btn btn-sm btn-danger"
+               onclick="return confirm('Delete this media?')">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

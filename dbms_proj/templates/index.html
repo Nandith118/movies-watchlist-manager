@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- HERO — Cyber Glow -->
+<section class="hero-banner text-center mb-4">
+  <div class="hero-inner">
+
+    <h1 class="display-5 fw-bold">
+      Welcome to <span class="neon">MediaHub</span> 🎬
+    </h1>
+
+    <p class="lead hero-desc">
+      Discover, rate & track the movies and series you love — now with a neon-powered modern interface.
+    </p>
+
+    <!-- CTA -->
+    <div class="hero-cta mt-3">
+      {% if session.get('user_role') == 'admin' %}
+        <a href="{{ url_for('add_media') }}" class="btn btn-cta">+ Add New Media</a>
+      {% elif not current_user_id %}
+        <a href="{{ url_for('register') }}" class="btn btn-cta btn-ghost">Join Now</a>
+      {% else %}
+        <a href="{{ url_for('watchlist') }}" class="btn btn-cta btn-ghost">My Watchlist</a>
+      {% endif %}
+    </div>
+
+    <!-- Mood Chips -->
+    <div class="mood-chips mt-4">
+      <button class="chip active" data-mood="all">All</button>
+      <button class="chip" data-mood="thrilling">Thrilling</button>
+      <button class="chip" data-mood="romantic">Romantic</button>
+      <button class="chip" data-mood="funny">Funny</button>
+      <button class="chip" data-mood="dark">Dark</button>
+      <button class="chip" data-mood="inspirational">Inspirational</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- FILTER BAR -->
+<div class="filter-bar rounded-3 p-3 mb-4">
+  <form method="get" class="row g-2 align-items-end">
+
+    <div class="col-auto">
+      <label class="form-label small mb-1">Type</label>
+      <select name="type" class="form-select form-select-sm">
+        <option value="all" {% if media_type=='all' %}selected{% endif %}>All</option>
+        <option value="Movie" {% if media_type=='Movie' %}selected{% endif %}>Movie</option>
+        <option value="Series" {% if media_type=='Series' %}selected{% endif %}>Series</option>
+      </select>
+    </div>
+
+    <div class="col-auto">
+      <label class="form-label small mb-1">Genre</label>
+      <select name="genre" class="form-select form-select-sm">
+        <option value="all">All Genres</option>
+        {% for g in genres %}
+        <option value="{{ g.genre_id }}" {% if genre_id==g.genre_id|string %}selected{% endif %}>
+          {{ g.genre_name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-auto">
+      <label class="form-label small mb-1">Year</label>
+      <select name="year" class="form-select form-select-sm">
+        <option value="all">All</option>
+        {% for y in years %}
+        <option value="{{ y }}" {% if year==y|string %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-auto">
+      <label class="form-label small mb-1">Platform</label>
+      <select name="platform" class="form-select form-select-sm">
+        <option value="all">All</option>
+        {% for p in platforms %}
+        <option value="{{ p.platform_id }}" {% if platform_id==p.platform_id|string %}selected{% endif %}>
+          {{ p.platform_name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-auto">
+      <label class="form-label small mb-1">Min IMDb</label>
+      <select name="min_rating" class="form-select form-select-sm">
+        <option value="0">Any</option>
+        <option value="6" {% if min_rating=='6' %}selected{% endif %}>6+</option>
+        <option value="7" {% if min_rating=='7' %}selected{% endif %}>7+</option>
+        <option value="8" {% if min_rating=='8' %}selected{% endif %}>8+</option>
+        <option value="9" {% if min_rating=='9' %}selected{% endif %}>9+</option>
+      </select>
+    </div>
+
+    <div class="col-auto">
+      <button class="btn btn-sm btn-filter">Apply</button>
+    </div>
+
+  </form>
+</div>
+
+
+
+<!-- ALL PICKS GRID -->
+<section id="all-media" class="mb-5">
+  <h2 class="section-title"><i class="bi bi-collection-play"></i> All Picks</h2>
+
+  <div class="row" id="media-grid">
+    {% for m in media %}
+
+      {% set mid = m[0] %}
+      {% set title = m[1] %}
+      {% set mtype = m[2] %}
+      {% set year = m[3] %}
+      {% set imdb = m[4] %}
+      {% set img = m[5] %}
+      {% set genre_names = m[6] %}
+
+      <div class="col-sm-6 col-md-4 col-lg-3 mb-4 media-card"
+           data-title="{{ title|lower }}"
+           data-type="{{ mtype }}"
+           data-year="{{ year }}"
+           data-imdb="{{ imdb }}"
+           data-genre="{{ genre_names|lower if genre_names else '' }}">
+
+        <div class="card h-100 glass-card">
+          <div class="poster-wrap">
+            {% if img %}
+              {% if img.startswith('http') %}
+                <img src="{{ img }}" class="card-img-top">
+              {% else %}
+                <img src="{{ url_for('static', filename='images/' + img|replace('static/images/','')) }}" class="card-img-top">
+              {% endif %}
+            {% else %}
+              <img src="{{ url_for('static', filename='images/no_image_available.png') }}" class="card-img-top">
+            {% endif %}
+          </div>
+
+          <div class="card-body">
+            <h6 class="card-title neon-small">{{ title }}</h6>
+            <p class="text-muted small">{{ mtype }} • {{ year }}</p>
+            <a href="{{ url_for('media_detail', mid=mid) }}"
+               class="btn btn-sm btn-primary rounded-pill">View</a>
+          </div>
+        </div>
+
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+
+
+<!-- LIVE TREND WALL -->
+<section class="live-wall mb-5">
+  <h2 class="section-title"><i class="bi bi-graph-up"></i> Live Trending Wall</h2>
+
+  <div class="live-grid">
+    {% for m in trending %}
+      {% set title = m[1] %}
+      {% set img = m[5] %}
+
+      <div class="live-tile">
+        {% if img %}
+          {% if img.startswith('http') %}
+            <img src="{{ img }}">
+          {% else %}
+            <img src="{{ url_for('static', filename='images/' + img|replace('static/images/','')) }}">
+          {% endif %}
+        {% else %}
+          <img src="{{ url_for('static', filename='images/no_image_available.png') }}">
+        {% endif %}
+
+        <div class="tile-caption">{{ title }}</div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<script src="{{ url_for('static', filename='home.js') }}"></script>
+
+{% endblock %}

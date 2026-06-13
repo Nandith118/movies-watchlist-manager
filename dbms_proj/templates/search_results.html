@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Search results for "{{ query }}"</h3>
+  <div class="row">
+    {% if results %}
+      {% for m in results %}
+        <div class="col-md-3 mb-4">
+          <div class="card h-100">
+            {% if m['image_url'] and m['image_url'].startswith('http') %}
+              <img src="{{ m['image_url'] }}" class="card-img-top" alt="{{ m['title'] }}">
+            {% else %}
+              <img src="{{ url_for('static', filename='images/' + m['image_url']|replace('static/images/', '')) }}" class="card-img-top" alt="{{ m['title'] }}">
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ m['title'] }}</h5>
+              <p class="card-text">{{ m['media_type'] }}</p>
+              <a href="{{ url_for('media_detail', mid=m['media_id']) }}" class="btn btn-primary btn-sm">View Details</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No results found for "{{ query }}"</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

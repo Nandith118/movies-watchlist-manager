@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <div class="row align-items-start">
+    
+    <!-- 🎞️ Poster -->
+    <div class="col-md-4 mb-4">
+      {% if media[7] %}
+        {% if media[7].startswith('http') %}
+          <img src="{{ media[7] }}" class="img-fluid rounded shadow-lg" alt="{{ media[1] }}">
+        {% else %}
+          <img src="{{ url_for('static', filename='images/' + media[7]|replace('static/images/', '')) }}"
+               class="img-fluid rounded shadow-lg" alt="{{ media[1] }}">
+        {% endif %}
+      {% else %}
+        <img src="{{ url_for('static', filename='images/no_image_available.png') }}"
+             class="img-fluid rounded shadow-lg" alt="No Image Available">
+      {% endif %}
+    </div>
+
+    <!-- 🎥 Media Info -->
+    <div class="col-md-8 text-light">
+      <h2 class="fw-bold text-warning">
+        {{ media[1] }} 
+        <small class="text-muted fs-5">({{ media[2] }})</small>
+      </h2>
+
+      <p class="mb-2">
+        <strong>📅 Year:</strong> {{ media[3] or '-' }} |
+        <strong>⏱ Runtime:</strong> {{ media[4] or '-' }} min
+      </p>
+
+      <p class="mb-2">
+        <strong>⭐ IMDb:</strong> {{ media[5] or 'N/A' }} |
+        <strong>🎯 Verdict:</strong> {{ media[6] or '-' }}
+      </p>
+
+      <!-- 🌟 Average User Rating -->
+      {% if avg_rating %}
+      <p class="mb-3">
+        <strong>🌟 Avg User Rating:</strong>
+        <span class="badge bg-warning text-dark">
+          ⭐ {{ avg_rating|round(1) }}/5
+        </span>
+        <small class="text-muted">({{ total_reviews }} user{{ 's' if total_reviews > 1 else '' }})</small>
+      </p>
+      {% endif %}
+
+      <p class="text-secondary">{{ media[8] or 'No description available.' }}</p>
+
+      <!-- 🎬 Genres -->
+      {% if genres %}
+        <p class="mb-2"><strong>🎬 Genres:</strong>
+          {% for g in genres %}
+            <span class="badge bg-warning text-dark">{{ g }}</span>
+          {% endfor %}
+        </p>
+      {% endif %}
+
+      <!-- 📺 Platforms -->
+      {% if platforms %}
+        <p class="mb-3"><strong>📺 Available on:</strong>
+          {% for p in platforms %}
+            <span class="badge bg-info text-dark">{{ p[0] }} ({{ p[1] }})</span>
+          {% endfor %}
+        </p>
+      {% endif %}
+
+      <!-- ❤️ Add to Watchlist -->
+      {% if not w_status %}
+  <!-- Show Add button only if not added -->
+  <form action="{{ url_for('add_to_watchlist', mid=media[0]) }}" method="post" class="mt-3">
+    <button class="btn btn-success rounded-pill px-4 py-2 fw-semibold">
+      + Add to Watchlist
+    </button>
+  </form>
+{% else %}
+  <!-- Show already added message -->
+  <div class="mt-3">
+    <span class="badge bg-success px-3 py-2">
+      ✓ Already in your Watchlist
+    </span>
+  </div>
+
+  <p class="mt-2">
+    <strong>Your Status:</strong>
+    <span class="badge bg-info text-dark">{{ w_status }}</span>
+  </p>
+{% endif %}
+
+    </div>
+  </div>
+
+  <hr class="mt-4">
+
+  <!-- 💬 Public Reviews -->
+  <h4 class="text-warning mb-3">💬 User Reviews</h4>
+
+  {% if reviews %}
+    <div class="list-group">
+      {% for r in reviews %}
+        <div class="list-group-item bg-dark text-light border-0 mb-2 rounded shadow-sm">
+          <div class="d-flex justify-content-between">
+            <strong class="text-warning">{{ r[0] }}</strong>
+            <small class="text-muted">{{ r[3] }}</small>
+          </div>
+          <p class="mb-1">⭐ {{ r[1] }}/5</p>
+          <p class="small">{{ r[2] }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No reviews yet. Users can review after adding this to their watchlist.</p>
+  {% endif %}
+
+  <div class="alert alert-info mt-4">
+    <strong>Tip:</strong> Add this to your Watchlist to rate and review it personally!
+  </div>
+
+</div>
+
+{% endblock %}

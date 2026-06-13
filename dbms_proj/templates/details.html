@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card bg-secondary text-light p-3">
+  <img src="{{ url_for('static', filename='images/' + movie.image_path) }}" 
+       class="card-img-top mb-3" style="max-height:500px; object-fit:cover;">
+  <div class="card-body">
+    <h2>{{ movie.title }}</h2>
+    <p><strong>Type:</strong> {{ movie.media_type }}</p>
+    <p><strong>Year:</strong> {{ movie.release_year }}</p>
+    <p><strong>IMDb Rating:</strong> ⭐ {{ movie.imdb_rating }}</p>
+    <p><strong>Verdict:</strong> {{ movie.theatrical_verdict }}</p>
+    <a href="/" class="btn btn-light mt-3">← Back to Home</a>
+  </div>
+</div>
+{% endblock %}

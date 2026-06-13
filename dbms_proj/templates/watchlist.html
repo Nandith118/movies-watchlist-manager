@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+  <h2 class="fw-bold text-warning">🎬 My Watchlist</h2>
+
+  
+  <form method="get" class="d-flex flex-wrap align-items-center" style="gap: 10px;">
+    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="all" {% if filter_status == 'all' %}selected{% endif %}>All Status</option>
+      <option value="Planned" {% if filter_status == 'Planned' %}selected{% endif %}>Planned</option>
+      <option value="Watching" {% if filter_status == 'Watching' %}selected{% endif %}>Watching</option>
+      <option value="Completed" {% if filter_status == 'Completed' %}selected{% endif %}>Completed</option>
+      <option value="Dropped" {% if filter_status == 'Dropped' %}selected{% endif %}>Dropped</option>
+    </select>
+
+    <select name="sort" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="none" {% if sort_order == 'none' %}selected{% endif %}>Sort by</option>
+      <option value="rating_desc" {% if sort_order == 'rating_desc' %}selected{% endif %}>Rating: High → Low</option>
+      <option value="rating_asc" {% if sort_order == 'rating_asc' %}selected{% endif %}>Rating: Low → High</option>
+    </select>
+  </form>
+</div>
+
+
+<div class="row">
+  {% for i in items %}
+  <div class="col-md-4 col-lg-3 mb-4">
+    <div class="card h-100 border-0 shadow-lg text-center hover-glow" style="background:#181818;">
+
+      {% if i.image_url %}
+  {% if i.image_url.startswith('http') %}
+    <img src="{{ i.image_url }}" class="card-img-top poster" alt="{{ i.title }}">
+  {% else %}
+    <img src="{{ url_for('static', filename='images/' + i.image_url) }}" class="card-img-top poster" alt="{{ i.title }}">
+  {% endif %}
+{% else %}
+  <img src="{{ url_for('static', filename='images/no_image_available.png') }}" class="card-img-top poster">
+{% endif %}
+
+
+      <div class="card-body d-flex flex-column justify-content-between">
+        <div>
+          <h5 class="card-title text-warning">{{ i.title }}</h5>
+          <span class="badge bg-dark mb-2">{{ i.status }}</span>
+
+          
+          {% if i.avg_rating %}
+            <p class="text-light small mb-1">
+              ⭐ <strong>{{ i.avg_rating|round(1) }}</strong> avg rating by {{ i.rating_count }} users
+            </p>
+          {% endif %}
+        </div>
+
+        
+        <form action="{{ url_for('rate_watchlist_item', mid=i.media_id) }}" method="post" class="mt-3">
+          <label class="form-label text-light small mb-1">Your Rating (0–5)</label>
+          <input type="number" name="rating" min="0" max="5" step="0.5"
+                 class="form-control form-control-sm text-center mb-2"
+                 value="{{ i.user_rating or '' }}" required>
+
+          <textarea name="review" class="form-control form-control-sm mb-2" rows="2"
+                    placeholder="Write your review...">{{ i.user_review or '' }}</textarea>
+
+          <button class="btn btn-sm btn-success w-100">💾 Save Review</button>
+        </form>
+
+        
+        <form action="{{ url_for('update_watch_status', mid=i.media_id) }}" method="post" class="mt-3">
+          <select name="status" class="form-select form-select-sm">
+            <option {% if i.status=='Planned' %}selected{% endif %}>Planned</option>
+            <option {% if i.status=='Watching' %}selected{% endif %}>Watching</option>
+            <option {% if i.status=='Completed' %}selected{% endif %}>Completed</option>
+            <option {% if i.status=='Dropped' %}selected{% endif %}>Dropped</option>
+          </select>
+          <button class="btn btn-sm btn-warning mt-2 w-100">⚙ Update Status</button>
+        </form>
+
+        
+        <form action="{{ url_for('remove_watchlist', mid=i.media_id) }}" method="post">
+          <button class="btn btn-sm btn-danger mt-3 w-100">🗑 Remove</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <h4 class="text-muted">Your watchlist is empty 😴</h4>
+    <a href="{{ url_for('index') }}" class="btn btn-warning rounded-pill mt-3">Discover Media</a>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
